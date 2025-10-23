@@ -93,18 +93,3 @@ VALUES
 ('07',207,'02','1982-06-28'),
 ('07',208,'02','1982-06-28');
 
--- vista
-CREATE OR REPLACE VIEW v_planes_detalle AS
-SELECT
-  p.id,
-  p.carrer,
-  c.nombre AS carrera_nombre,
-  p.semest,
-  p.materi,
-  m.descri AS materia_nombre,
-  p.fecalt,
-  p.fecbaj
-FROM planes p
-LEFT JOIN carreras c ON c.clave = p.carrer
-LEFT JOIN materias m ON m.clave = p.materi
-ORDER BY p.carrer, p.semest, p.materi;

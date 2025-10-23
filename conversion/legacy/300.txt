@@ -1,0 +1,38 @@
+* ------------------------------------------------------------------ *
+*  { ESC300 }  Menu de Planes                                        *
+*  Autor: Aristoteles J. Portillo Diaz                               *
+*  Fecha: 18 de Octubre de 1991                                      *
+* ------------------------------------------------------------------ *
+
+define popup pPLANES   from 01,22
+  define bar 1 of pPLANES prompt "1.- A,B,C de Materias en Planes de Estudio"
+  define bar 2 of pPLANES prompt "2.- Listado de Planes de Estudio"
+  on selection popup pPLANES   do oPLANES with bar()
+
+activate popup pPLANES
+release  popup pPLANES
+
+return
+
+
+procedure oPLANES
+parameter mBar
+
+if NoEsUsuario(mUsuario) .and. mBar = 2 then
+   return
+endif
+
+do case
+
+  case mBar = 1
+    save screen
+    do ESC310
+    restore screen
+  case mBar = 2
+    save screen
+    do ESC320
+    restore screen
+
+endcase
+
+return

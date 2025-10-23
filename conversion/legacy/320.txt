@@ -1,0 +1,28 @@
+* =================================================================== *
+* { ESC711A } Definicion del menu de planes de estudio                *
+*             Autor: Aristoteles J. Portillo Diaz                     *
+*             Fecha: 11 de Enero de 1992                              *
+* =================================================================== *
+
+private i
+
+set path to \escolar\files
+use planes   in a alias plan index plain4
+use carreras in b alias carrera index carin1
+set path to \escolar\progr
+
+select PLAN
+set relation to CARRER into CARRERA
+
+define popup pPLANESEST from 1,1
+i=0
+do while .not. eof('PLAN')
+  i = i+1
+  define bar i of pPLANESEST prompt PLAN.CLAVE + PLAN.CARRER + ' ' + CARRERA.NOMBRE
+  skip
+enddo
+
+on selection popup pPLANESEST deactivate popup pPLANESEST
+
+close data
+return

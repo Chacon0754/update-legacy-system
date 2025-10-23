@@ -1,0 +1,224 @@
+*-----------------------------------------------------*
+* { ESC310 }    Mantenimiento al archivo de Planes    *
+           *
+*  Adaptacion:  Aristoteles Portillo Diaz             *
+*  Fecha:       15 de Septiembre de 1991              *
+*-----------------------------------------------------*
+
+private mOpcion, mCLAVE , mCARRER, mMATERI, mFECALT, mFECBAJ, ;
+        REQSIM, mREQUI1, mREQUI2, mREQUI3, mREQUI4, mSEMEST
+
+set path to \escolar\files
+use carreras in a alias carrera index carin1, carin2
+use planes   in b alias plan    index plain1, plain2, plain3, plain4
+use materias in c alias materia index matin1, matin2
+set path to \escolar\progr
+
+define window wPlanes from 0,0 to 23,79 title ' Altas, Bajas y Cambios a Planes de Estudio '
+
+select PLAN
+set order to 3
+
+activate window wPlanes
+do PlaFormat
+
+mCLAVE  = space(1)
+mCARRER = space(2)
+mSEMEST = space(2)
+
+do while lastkey() # 27
+
+   mMATERI = space(3)
+   mFECALT = ctod("  /  /  ")
+   mFECBAJ = ctod("  /  /  ")
+   mREQSIM = space(3)
+   mREQUI1 = space(3)
+   mREQUI2 = space(3)
+   mREQUI3 = space(3)
+   mREQUI4 = space(3)
+
+   @ 08,35 to 18,77 clear
+   @ 08,35 get mCLAVE  picture '!' valid CveCorr(mCLAVE) error 'La Clave debe ser letra A - Z'
+   @ 09,35 get mCARRER picture '99'  valid  ExisCarr(mCARRER) error ' No existe la carrera '
+   @ 10,35 get mSEMEST range '01','10'  error ' El semestre debe ser de 1-10 '
+   @ 11,35 get mMATERI picture '!99' valid  ExisMate(mMATERI) error ' No existe la materia '
+   read
+
+   if lastkey() = 27 then
+     loop
+   endif
+
+   seek mCLAVE + mCARRER + mSEMEST + mMATERI
+
+   if found() then
+     do PlaToMemo with mCLAVE, mCARRER, mMATERI, mFECALT, mFECBAJ, mREQSIM, mREQUI1, mREQUI2, mREQUI3, mREQUI4, mSEMEST
+     mOpcion = PlanMov()
+   endif
+
+   do case
+
+     case .not. found()
+
+       do LeeDatos
+       if lastkey() = 27 then
+	     loop
+       endif
+       if SioNo("Correcto") then
+         append blank
+	     do PlaToFile with mCLAVE, mCARRER, mMATERI, mFECALT, mFECBAJ, mREQSIM, mREQUI1, mREQUI2, mREQUI3, mREQUI4, mSEMEST
+       endif
+
+     case mOpcion = 1
+     
+       loop
+
+     case mOpcion = 2
+
+       if SioNo("Dar de Baja") then
+	     delete
+       endif
+
+     case  mOpcion = 3
+
+       do LeeDatos
+       if lastkey() = 27 then
+	     loop
+       endif
+       if SioNo("Correcto") then
+	     do PlaToFile with mCLAVE, mCARRER, mMATERI, mFECALT, mFECBAJ, mREQSIM, mREQUI1, mREQUI2, mREQUI3, mREQUI4, mSEMEST
+       endif
+   endcase
+
+enddo
+
+
+set udfparms to value
+deactivate window all
+release window wPlanes
+close data
+
+return
+
+
+procedure LeeDatos
+
+  @ 12,35 get mFECALT picture '@d'
+  @ 13,35 get mFECBAJ picture '@d'
+  @ 14,35 get mREQSIM picture '!99' valid seek(mREQSIM, 'MATERIA') .or.  mREQSIM = '   ' error ' No existe la materia '
+  @ 15,35 get mREQUI1 picture '!99' valid seek(mREQUI1, 'MATERIA') .or.  mREQUI1 = '   ' error ' No existe la materia '
+  @ 16,35 get mREQUI2 picture '!99' valid seek(mREQUI2, 'MATERIA') .or.  mREQUI2 = '   ' error ' No existe la materia '
+  @ 17,35 get mREQUI3 picture '!99' valid seek(mREQUI3, 'MATERIA') .or.  mREQUI3 = '   ' error ' No existe la materia '
+  @ 18,35 get mREQUI4 picture '!99' valid seek(mREQUI4, 'MATERIA') .or.  mREQUI4 = '   ' error ' No existe la materia '
+  read
+  
+return
+
+
+
+procedure PlaToMemo
+parameter mCLAVE, mCARRER, mMATERI, mFECALT, mFECBAJ, mREQSIM, mREQUI1, mREQUI2, mREQUI3, mREQUI4, mSEMEST
+
+  mCLAVE  = CLAVE
+  mCARRER = CARRER
+  mMATERI = MATERI
+  mFECALT = FECALT
+  mFECBAJ = FECBAJ
+  mREQSIM = REQSIM
+  mREQUI1 = REQUI1
+  mREQUI2 = REQUI2
+  mREQUI3 = REQUI3
+  mREQUI4 = REQUI4
+  mSEMEST = SEMEST
+
+  @ 12,35 say mFECALT
+  @ 13,35 say mFECBAJ
+  @ 14,35 say mREQSIM
+  @ 15,35 say mREQUI1
+  @ 16,35 say mREQUI2
+  @ 17,35 say mREQUI3
+  @ 18,35 say mREQUI4
+  
+return
+
+
+procedure PlaToFile
+parameter mCLAVE, mCARRER, mMATERI, mFECALT, mFECBAJ, mREQSIM, mREQUI1, mREQUI2, mREQUI3, mREQUI4, mSEMEST
+
+  replace CLAVE  with mCLAVE
+  replace CARRER with mCARRER
+  replace MATERI with mMATERI
+  replace FECALT with mFECALT
+  replace FECBAJ with mFECBAJ
+  replace REQSIM with mREQSIM
+  replace REQUI1 with mREQUI1
+  replace REQUI2 with mREQUI2
+  replace REQUI3 with mREQUI3
+  replace REQUI4 with mREQUI4
+  replace SEMEST with mSEMEST
+
+return
+
+
+function PlanMov
+private mOpcion
+
+ activate screen
+
+ @ 24,01 clear to 24,79
+ @ 24,03 prompt " ® Interrumpir ¯ "
+ @ 24,33 prompt ' < Baja > '
+ @ 24,65 prompt ' < Cambio > '
+
+ menu to mOpcion
+ @ 24,01 to 24,79 clear
+
+ activate window wPlanes
+
+return mOpcion
+
+
+
+procedure PlaFormat
+
+  @ 08,12 say 'Clave:'
+  @ 09,12 say 'Carrera:'
+  @ 11,12 say 'Materia:'
+  @ 10,12 say 'Semestre:'  
+  @ 12,12 say 'Fecha de Alta:'
+  @ 13,12 say 'Fecha de Baja:'
+  @ 14,12 say 'Requisito Simultaneo:'
+  @ 15,12 say 'Requisito 1:'
+  @ 16,12 say 'Requisito 2:'
+  @ 17,12 say 'Requisito 3:'
+  @ 18,12 say 'Requisito 4:'
+  
+return
+
+function ExisCarr
+  parameter mCLAVE
+
+  if seek(mCLAVE, 'CARRERA') then
+    @ 09,40 say CARRERA.NOMBRE
+    return .T.
+  else
+    return .F.
+  endif
+
+
+function ExisMate
+  parameter mCLAVE
+  
+  if seek(mCLAVE, 'MATERIA') then
+    @ 10,40 say MATERIA.DESCRI
+    return .T.
+  else
+    return .F.
+  endif
+
+function CveCorr
+parameter mCve
+
+if .not. isalpha(mCve)
+   return .f.
+endif
+return .t.
